@@ -44,7 +44,9 @@ class MailgunAdapter extends MailAdapter.default {
      */
     _sendMail(options) {
         const self = this;
-        let message = {}, templateVars = {}, templateName = options.templateName;
+        let message = {},
+            templateVars = {},
+            templateName = options.templateName;
 
         if (!templateName)
             throw new Error('Invalid options object: missing templateName');
@@ -83,7 +85,8 @@ class MailgunAdapter extends MailAdapter.default {
                 link,
                 appName,
                 username: user.get('username'),
-                email: user.get('email')
+                email: user.get('email'),
+                key: user.get('emailCode')
             }, userVars);
 
             message = {
@@ -93,7 +96,7 @@ class MailgunAdapter extends MailAdapter.default {
             };
         }
 
-        return co(function* () {
+        return co(function*() {
             let compiled;
             let pathPlainText = template.pathPlainText;
             let pathHtml = template.pathHtml;
@@ -107,7 +110,7 @@ class MailgunAdapter extends MailAdapter.default {
             }
 
             // Compile plain-text template
-            compiled = _template(cachedTemplate['text'], { interpolate: /{{([\s\S]+?)}}/g});
+            compiled = _template(cachedTemplate['text'], { interpolate: /{{([\s\S]+?)}}/g });
             // Add processed text to the message object
             message.text = compiled(templateVars);
 
@@ -118,7 +121,7 @@ class MailgunAdapter extends MailAdapter.default {
                 }
 
                 // Compile html template
-                compiled = _template(cachedTemplate['html'], { interpolate: /{{([\s\S]+?)}}/g});
+                compiled = _template(cachedTemplate['html'], { interpolate: /{{([\s\S]+?)}}/g });
                 // Add processed HTML to the message object
                 message.html = compiled(templateVars);
             }
@@ -142,7 +145,7 @@ class MailgunAdapter extends MailAdapter.default {
 
             return payload;
 
-        }).then( payload => {
+        }).then(payload => {
             return new Promise((resolve, reject) => {
                 this.mailgun.messages().sendMime(payload, (error, body) => {
                     if (error) reject(error);
